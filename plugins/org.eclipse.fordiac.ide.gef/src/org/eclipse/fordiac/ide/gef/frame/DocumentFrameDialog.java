@@ -15,6 +15,7 @@ package org.eclipse.fordiac.ide.gef.frame;
 import org.eclipse.fordiac.ide.gef.frame.DocumentFrame.PaperSize;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -50,7 +51,15 @@ public class DocumentFrameDialog extends Dialog {
 	protected void configureShell(final Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText("Configure Document Frame"); //$NON-NLS-1$
-		newShell.setSize(450, 350);
+	}
+
+	@Override
+	protected Point getInitialSize() {
+		// A setSize() call in configureShell() would be overridden by JFace's own
+		// bounds computation in Window.initializeBounds(), which runs afterwards and
+		// asks getInitialSize() for the size to apply - so the preferred size has to
+		// be provided here instead.
+		return new Point(450, 350);
 	}
 
 	@Override

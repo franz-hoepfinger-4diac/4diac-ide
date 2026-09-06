@@ -465,9 +465,14 @@ public class PrintPreview extends Dialog {
 		final int limit = Math.max(1, pageLimit);
 		final Point displayDpi = Display.getCurrent().getDPI();
 		final Point printerDpi = (printer != null && !printer.isDisposed()) ? printer.getDPI() : displayDpi;
+		// Device DPI ratio: converts a length in display pixels to the equivalent
+		// physical length in printer device units. Capping at this value (rather
+		// than just 1.0) is what keeps small content at true 1:1 physical size on
+		// paper instead of letting it print oversized just because a page limit
+		// allows more scale-up room.
 		final double base = printerDpi.x * 1.0 / displayDpi.x * 1.0;
 		final double areaFit = Math.sqrt(limit * marginW * marginH / (figW * figH));
-		double scale = Math.min(areaFit, base); // cap at 1:1 so small content does not print oversized
+		double scale = Math.min(areaFit, base);
 		final double step = 0.01;
 		while ((Math.ceil(figW * scale / marginW - PAGE_COUNT_EPSILON)
 				* Math.ceil(figH * scale / marginH - PAGE_COUNT_EPSILON)) > limit && scale > step) {
