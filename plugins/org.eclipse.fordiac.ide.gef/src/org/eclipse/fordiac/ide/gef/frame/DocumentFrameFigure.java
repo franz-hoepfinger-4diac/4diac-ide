@@ -26,6 +26,7 @@ public class DocumentFrameFigure extends FreeformLayer {
 	private static final int MARGIN = 24;
 	private static final int TITLE_BLOCK_WIDTH = 240;
 	private static final int TITLE_BLOCK_HEIGHT = 60;
+	private static final int FRAME_DOUBLE_LINE_GAP = 4;
 
 	private DocumentFrame frame;
 
@@ -82,11 +83,16 @@ public class DocumentFrameFigure extends FreeformLayer {
 		graphics.setLineStyle(Graphics.LINE_DASH);
 		graphics.drawRectangle(0, 0, width, height);
 
-		// 2. Inner Frame Border (solid line)
+		// 2. Inner Frame Border (Zeichnungsrahmen) around the print content: a red
+		// double line, per IEC 61082-1 drawing frame convention.
 		graphics.setLineStyle(Graphics.LINE_SOLID);
+		graphics.setForegroundColor(ColorConstants.red);
 		graphics.setLineWidth(2);
 		final Rectangle inner = new Rectangle(MARGIN, MARGIN, width - (2 * MARGIN), height - (2 * MARGIN));
 		graphics.drawRectangle(inner);
+		graphics.setLineWidth(1);
+		graphics.drawRectangle(inner.getCopy().shrink(FRAME_DOUBLE_LINE_GAP, FRAME_DOUBLE_LINE_GAP));
+		graphics.setForegroundColor(ColorConstants.black);
 
 		// 3. Grid Columns (1..N across top and bottom)
 		final int cols = frame.getPaperSize().getColumns();
