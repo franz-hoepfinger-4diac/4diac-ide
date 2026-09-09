@@ -806,8 +806,9 @@ class PrintMargin {
 			final double paperHeightInch) {
 		final Point dpi = (printer != null && !printer.isDisposed()) ? printer.getDPI() : Display.getCurrent().getDPI();
 		Rectangle clientArea = new Rectangle(0, 0, (int) (paperWidthInch * dpi.x), (int) (paperHeightInch * dpi.y));
-		final Rectangle trim = (printer != null && !printer.isDisposed()) ? printer.computeTrim(0, 0, 0, 0)
+		final Rectangle rawTrim = (printer != null && !printer.isDisposed()) ? printer.computeTrim(0, 0, 0, 0)
 				: new Rectangle(0, 0, 0, 0);
+		final Rectangle trim = clampTrim(rawTrim, dpi);
 
 		if (landscape) {
 			clientArea = new Rectangle(clientArea.y, clientArea.x, clientArea.height, clientArea.width);
@@ -819,6 +820,28 @@ class PrintMargin {
 		final int bottomMargin = clientArea.height + trim.height - (int) (marginBottom * dpi.y) - trim.y;
 
 		return new PrintMargin(leftMargin, rightMargin, topMargin, bottomMargin);
+	}
+
+	/**
+	 * Some Linux/GTK printer drivers (notably virtual "Print to File"/PDF
+	 * backends) report implausible values from Printer.computeTrim() - e.g. a
+	 * multi-inch trim where no real hardware margin exists - which otherwise
+	 * turns directly into a huge, unwanted margin on the printed/exported page
+	 * even though the in-app preview (which has no real Printer yet, so always
+	 * uses a zero trim) never shows it. Real hardware trims are a small fraction
+	 * of an inch, so clamp to a generous but bounded allowance instead of trusting
+	 * the driver-reported value verbatim.
+	 */
+	private static final double MAX_PLAUSIBLE_TRIM_INCH = 0.75;
+
+	private static Rectangle clampTrim(final Rectangle trim, final Point dpi) {
+		final int maxX = (int) (MAX_PLAUSIBLE_TRIM_INCH * dpi.x);
+		final int maxY = (int) (MAX_PLAUSIBLE_TRIM_INCH * dpi.y);
+		final int x = Math.max(-maxX, Math.min(0, trim.x));
+		final int y = Math.max(-maxY, Math.min(0, trim.y));
+		final int width = Math.max(0, Math.min(2 * maxX, trim.width));
+		final int height = Math.max(0, Math.min(2 * maxY, trim.height));
+		return new Rectangle(x, y, width, height);
 	}
 
 	@Override
