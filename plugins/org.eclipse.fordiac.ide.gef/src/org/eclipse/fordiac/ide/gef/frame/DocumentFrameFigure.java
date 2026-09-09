@@ -15,11 +15,18 @@ package org.eclipse.fordiac.ide.gef.frame;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.LayeredPane;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.LayerConstants;
 
 /**
  * Draw2D Figure that renders an IEC 61082-1 Document Frame (border, grid
- * columns 1..N, rows A..H, and title block) at coordinate (0,0).
+ * columns 1..N, rows A..H, and title block), positioned to hug the actual
+ * network content rather than a fixed absolute location - the network is not
+ * guaranteed to start at (0,0), so anchoring the frame there could leave it
+ * far outside the area the user is actually looking at.
  */
 public class DocumentFrameFigure extends FreeformLayer {
 
@@ -27,6 +34,8 @@ public class DocumentFrameFigure extends FreeformLayer {
 	private static final int TITLE_BLOCK_WIDTH = 240;
 	private static final int TITLE_BLOCK_HEIGHT = 60;
 	private static final int FRAME_DOUBLE_LINE_GAP = 4;
+	/** Gap between the actual network content and the frame's paper edge. */
+	private static final int CONTENT_PADDING = 40;
 
 	private DocumentFrame frame;
 
@@ -61,7 +70,42 @@ public class DocumentFrameFigure extends FreeformLayer {
 		if (frame == null) {
 			return super.getFreeformExtent();
 		}
-		return new Rectangle(0, 0, frame.getPaperSize().getWidth(), frame.getPaperSize().getHeight());
+		final Point origin = getFrameOrigin();
+		return new Rectangle(origin.x, origin.y, frame.getPaperSize().getWidth(), frame.getPaperSize().getHeight());
+	}
+
+	/**
+	 * Where the paper's top-left corner should sit: hugging the actual network
+	 * content's bounding box (minus a fixed padding) rather than always literal
+	 * (0,0), since the network is free to be positioned anywhere by the user.
+	 * Falls back to (0,0) if there is no content yet (or no parent to look it up
+	 * from, e.g. before this figure has been added to the layer tree).
+	 */
+	private Point getFrameOrigin() {
+		final Rectangle contentBounds = getContentBounds();
+		if (contentBounds == null) {
+			return new Point(0, 0);
+		}
+		return new Point(contentBounds.x - CONTENT_PADDING,
+				contentBounds.y - CONTENT_PADDING);
+	}
+
+	private Rectangle getContentBounds() {
+		if (!(getParent() instanceof final LayeredPane pane)) {
+			return null;
+		}
+		Rectangle union = null;
+		for (final Object layerKey : new Object[] { LayerConstants.PRIMARY_LAYER, LayerConstants.CONNECTION_LAYER }) {
+			final IFigure layer = pane.getLayer(layerKey);
+			if (layer == null) {
+				continue;
+			}
+			for (final Object childObj : layer.getChildren()) {
+				final Rectangle childBounds = ((IFigure) childObj).getBounds();
+				union = (union == null) ? childBounds.getCopy() : union.union(childBounds);
+			}
+		}
+		return union;
 	}
 
 	@Override
@@ -76,19 +120,21 @@ public class DocumentFrameFigure extends FreeformLayer {
 		graphics.setLineWidth(1);
 		graphics.setForegroundColor(ColorConstants.black);
 
+		final Point origin = getFrameOrigin();
 		final int width = frame.getPaperSize().getWidth();
 		final int height = frame.getPaperSize().getHeight();
 
 		// 1. Outer paper boundary rectangle
 		graphics.setLineStyle(Graphics.LINE_DASH);
-		graphics.drawRectangle(0, 0, width, height);
+		graphics.drawRectangle(origin.x, origin.y, width, height);
 
 		// 2. Inner Frame Border (Zeichnungsrahmen) around the print content: a red
 		// double line, per IEC 61082-1 drawing frame convention.
 		graphics.setLineStyle(Graphics.LINE_SOLID);
 		graphics.setForegroundColor(ColorConstants.red);
 		graphics.setLineWidth(2);
-		final Rectangle inner = new Rectangle(MARGIN, MARGIN, width - (2 * MARGIN), height - (2 * MARGIN));
+		final Rectangle inner = new Rectangle(origin.x + MARGIN, origin.y + MARGIN, width - (2 * MARGIN),
+				height - (2 * MARGIN));
 		graphics.drawRectangle(inner);
 		graphics.setLineWidth(1);
 		graphics.drawRectangle(inner.getCopy().shrink(FRAME_DOUBLE_LINE_GAP, FRAME_DOUBLE_LINE_GAP));

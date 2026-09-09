@@ -22,7 +22,6 @@ import org.eclipse.draw2d.PrintFigureOperation;
 import org.eclipse.draw2d.PrinterGraphics;
 import org.eclipse.draw2d.SWTGraphics;
 import org.eclipse.fordiac.ide.gef.Messages;
-import org.eclipse.fordiac.ide.gef.frame.DocumentFrame;
 import org.eclipse.fordiac.ide.gef.frame.DocumentFrameFigure;
 import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.gef.GraphicalViewer;
@@ -380,18 +379,17 @@ public class PrintPreview extends Dialog {
 
 	/**
 	 * Returns the full print area = content bounds unioned with the IEC document
-	 * frame paper size. This ensures the frame (drawn at origin 0,0) is included
-	 * in the tiling calculation.
+	 * frame's own bounds. The frame figure positions itself to hug the actual
+	 * network content (see DocumentFrameFigure.getFrameOrigin()) rather than
+	 * always sitting at a fixed origin, so its current bounds - not a
+	 * reconstruction from the configured paper size at (0,0) - are what need to
+	 * be included in the tiling calculation.
 	 */
 	private org.eclipse.draw2d.geometry.Rectangle getPrintArea() {
 		final org.eclipse.draw2d.geometry.Rectangle area = figure.getBounds().getCopy();
 		for (final IFigure child : figure.getChildren()) {
-			if (child instanceof final DocumentFrameFigure dff) {
-				final DocumentFrame frame = dff.getFrame();
-				if (frame != null && frame.getPaperSize() != null) {
-					area.union(new org.eclipse.draw2d.geometry.Rectangle(0, 0,
-							frame.getPaperSize().getWidth(), frame.getPaperSize().getHeight()));
-				}
+			if (child instanceof final DocumentFrameFigure dff && dff.getFrame() != null) {
+				area.union(dff.getBounds());
 			}
 		}
 		return area;
