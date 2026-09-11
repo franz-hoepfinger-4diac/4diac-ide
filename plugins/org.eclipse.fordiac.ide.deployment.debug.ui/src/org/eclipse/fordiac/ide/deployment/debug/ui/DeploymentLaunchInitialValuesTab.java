@@ -56,11 +56,11 @@ import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.model.libraryElement.SubApp;
 import org.eclipse.fordiac.ide.model.libraryElement.VarDeclaration;
 import org.eclipse.fordiac.ide.model.libraryElement.provider.LibraryElementItemProviderAdapterFactory;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.widget.nattable.AbstractColumnAccessor;
 import org.eclipse.fordiac.ide.ui.widget.nattable.NatTableColumnEditableRule;
 import org.eclipse.fordiac.ide.ui.widget.nattable.NatTableColumnProvider;
 import org.eclipse.fordiac.ide.ui.widget.nattable.NatTableWidgetFactory;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -144,12 +144,12 @@ public class DeploymentLaunchInitialValuesTab extends AbstractLaunchConfiguratio
 		addButton = new Button(comp, SWT.PUSH);
 		addButton.setText(Messages.DeploymentLaunchInitialValuesTab_AddButton);
 		addButton.setEnabled(false);
-		addButton.addSelectionListener(widgetSelectedAdapter(e -> handleAddButtonSelected()));
+		addButton.addSelectionListener(widgetSelectedAdapter(_ -> handleAddButtonSelected()));
 
 		removeButton = new Button(comp, SWT.PUSH);
 		removeButton.setText(Messages.DeploymentLaunchInitialValuesTab_RemoveButton);
 		removeButton.setEnabled(false);
-		removeButton.addSelectionListener(widgetSelectedAdapter(e -> handleRemoveButtonSelected()));
+		removeButton.addSelectionListener(widgetSelectedAdapter(_ -> handleRemoveButtonSelected()));
 
 		GridLayoutFactory.swtDefaults().generateLayout(comp);
 
@@ -371,7 +371,7 @@ public class DeploymentLaunchInitialValuesTab extends AbstractLaunchConfiguratio
 			case final FBNetwork network -> network.getBlockFBNetworkElements().toArray();
 			case final SubApp subApp -> new Object[] { subApp.getInterface(), subApp.loadSubAppNetwork() };
 			case final BlockFBNetworkElement fbne -> new Object[] { fbne.getInterface() };
-			case final FBNetworkElement fbne -> new Object[0];
+			case final FBNetworkElement _ -> new Object[0];
 			case final InterfaceList interfaceList ->
 				Stream.of(interfaceList.getInputVars(), interfaceList.getInOutVars()).flatMap(List::stream).toArray();
 			default -> super.getChildren(parentElement);
@@ -383,8 +383,8 @@ public class DeploymentLaunchInitialValuesTab extends AbstractLaunchConfiguratio
 			return switch (element) {
 			case final AutomationSystem system -> !system.getApplication().isEmpty();
 			case final FBNetwork network -> network.getBlockFBNetworkElements().findAny().isPresent();
-			case final BlockFBNetworkElement fbne -> true;
-			case final FBNetworkElement fbne -> false;
+			case final BlockFBNetworkElement _ -> true;
+			case final FBNetworkElement _ -> false;
 			case final InterfaceList interfaceList ->
 				!interfaceList.getInputVars().isEmpty() || !interfaceList.getInOutVars().isEmpty();
 			default -> super.hasChildren(element);

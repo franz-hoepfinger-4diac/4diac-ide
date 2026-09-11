@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.fordiac.ide.globalconstantseditor.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: %GlobalConstEditorUI.bundleName
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.100.qualifier
 Bundle-SymbolicName: org.eclipse.fordiac.ide.globalconstantseditor.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
@@ -34,7 +34,7 @@ Require-Bundle: org.eclipse.fordiac.ide.globalconstantseditor,
 Import-Package: org.apache.log4j,
  org.eclipse.ui,
  org.eclipse.xtext.ui.codemining;resolution:=optional
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-25
 Export-Package: org.eclipse.fordiac.ide.globalconstantseditor.ui,
  org.eclipse.fordiac.ide.globalconstantseditor.ui.codemining,
  org.eclipse.fordiac.ide.globalconstantseditor.ui.contentassist,

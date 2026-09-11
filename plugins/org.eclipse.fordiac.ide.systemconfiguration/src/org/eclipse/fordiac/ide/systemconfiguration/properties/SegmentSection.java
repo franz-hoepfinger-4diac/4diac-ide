@@ -19,8 +19,8 @@ import org.eclipse.fordiac.ide.model.commands.change.ChangeNameCommand;
 import org.eclipse.fordiac.ide.model.libraryElement.Segment;
 import org.eclipse.fordiac.ide.model.systemconfiguration.CommunicationConfigurationDetails;
 import org.eclipse.fordiac.ide.systemconfiguration.Messages;
-import org.eclipse.fordiac.ide.ui.errormessages.ErrorMessenger;
 import org.eclipse.fordiac.ide.ui.widget.CommandExecutor;
+import org.eclipse.fordiac.ide.util.ErrorMessenger;
 import org.eclipse.gef.EditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -68,7 +68,7 @@ public class SegmentSection extends AbstractDoubleColumnSection {
 		composite.setLayoutData(new GridData(SWT.FILL, 0, true, false));
 		getWidgetFactory().createCLabel(composite, "Instance Name:");
 		nameText = createGroupText(composite, true);
-		nameText.addModifyListener(event -> {
+		nameText.addModifyListener(_ -> {
 			removeContentAdapter();
 			executeCommand(ChangeNameCommand.forName(getType(), nameText.getText()));
 			addContentAdapter();
@@ -78,7 +78,7 @@ public class SegmentSection extends AbstractDoubleColumnSection {
 		commentText = createGroupText(composite, true);
 		final GridData gridData = new GridData(SWT.FILL, 0, true, false);
 		commentText.setLayoutData(gridData);
-		commentText.addModifyListener(event -> {
+		commentText.addModifyListener(_ -> {
 			removeContentAdapter();
 			executeCommand(new ChangeCommentCommand(getType(), commentText.getText()));
 			addContentAdapter();

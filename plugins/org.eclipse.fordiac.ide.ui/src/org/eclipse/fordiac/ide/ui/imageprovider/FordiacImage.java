@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -54,6 +54,7 @@ public enum FordiacImage {
 	ICON_CLEAR_DEVICE,
 	ICON_CLEAR_FORCE,
 	ICON_CLEAR_FORCE_DISABLED,
+	ICON_COMMENT,
 	ICON_COMPOSITE_FB,
 	ICON_DATA,
 	ICON_DATA_INPUT,

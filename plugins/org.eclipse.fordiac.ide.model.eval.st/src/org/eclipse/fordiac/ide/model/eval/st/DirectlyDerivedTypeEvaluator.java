@@ -13,11 +13,9 @@
 package org.eclipse.fordiac.ide.model.eval.st;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.fordiac.ide.model.data.DirectlyDerivedType;
 import org.eclipse.fordiac.ide.model.eval.Evaluator;
@@ -27,7 +25,6 @@ import org.eclipse.fordiac.ide.model.eval.value.Value;
 import org.eclipse.fordiac.ide.model.eval.variable.Variable;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableEvaluator;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableOperations;
-import org.eclipse.fordiac.ide.model.helpers.PackageNameHelper;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.structuredtextalgorithm.util.StructuredTextParseUtil;
 import org.eclipse.fordiac.ide.structuredtextcore.stcore.STInitializerExpressionSource;
@@ -81,10 +78,21 @@ public class DirectlyDerivedTypeEvaluator extends StructuredTextEvaluator implem
 
 	@Override
 	public Variable<?> evaluateVariable() throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(null);
+	}
+
+	@Override
+	public Variable<?> evaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(explicitlyInitialized);
+	}
+
+	private Variable<?> doEvaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		prepare();
 		final Variable<?> result = VariableOperations.newVariable(directlyDerivedType.getName(), evaluateResultType());
 		if (parseResult != null && parseResult.getInitializerExpression() != null) {
-			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression());
+			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression(), explicitlyInitialized);
 		}
 		return result;
 	}
@@ -107,24 +115,6 @@ public class DirectlyDerivedTypeEvaluator extends StructuredTextEvaluator implem
 	public boolean validateResultType(final List<String> errors, final List<String> warnings, final List<String> infos)
 			throws EvaluatorException, InterruptedException {
 		return true;
-	}
-
-	@Override
-	public Set<String> getDependencies() {
-		return Stream.concat(getTypeDependencies().stream(), getInitialValueDependencies().stream())
-				.collect(Collectors.toSet());
-	}
-
-	protected Set<String> getTypeDependencies() {
-		return Set.of(PackageNameHelper.getFullTypeName(directlyDerivedType.getBaseType()));
-	}
-
-	protected Set<String> getInitialValueDependencies() {
-		prepare();
-		if (parseResult != null) {
-			return StructuredTextParseUtil.collectUsedTypes(parseResult);
-		}
-		return Collections.emptySet();
 	}
 
 	@Override

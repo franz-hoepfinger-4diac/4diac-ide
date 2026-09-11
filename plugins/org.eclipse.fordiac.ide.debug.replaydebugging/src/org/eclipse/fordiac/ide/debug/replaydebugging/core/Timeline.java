@@ -87,7 +87,7 @@ public class Timeline {
 		eventChanges.add(new EventChange(eventChanges.size(), newValues));
 		// add mapping from datapoints to event numbers
 		for (final var newValue : newValues) {
-			eventsWhereDatapointsChange.computeIfAbsent(newValue.datapoint(), k -> new HashSet<>());
+			eventsWhereDatapointsChange.computeIfAbsent(newValue.datapoint(), _ -> new HashSet<>());
 			eventsWhereDatapointsChange.get(newValue.datapoint()).add(Integer.valueOf(eventChanges.size() - 1));
 		}
 		notifyNewEvent();
@@ -108,10 +108,6 @@ public class Timeline {
 			}
 		}
 
-		// create a deep copy of toRemove
-		final var toRemoveCopy = new ArrayList<>(toRemove);
-		toRemove.clear();
-
 		// remove timelines which spawn from removed events
 		for (final var entry : spawnedTimelines.entrySet()) {
 			final var spawnedTimeline = entry.getKey();
@@ -121,6 +117,9 @@ public class Timeline {
 			}
 		}
 
+		// create a deep copy of toRemove
+		final var toRemoveCopy = new ArrayList<>(toRemove);
+		toRemove.clear();
 		notifyRemoveEvents(eventNumber, toRemoveCopy);
 
 	}

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -131,7 +132,7 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 		this.name = name;
 		this.variables = Stream.concat(StreamSupport.stream(variables.spliterator(), false), Stream.of(context))
 				.filter(Objects::nonNull)
-				.collect(Collectors.toMap(Variable::getName, Function.identity(), (oldValue, newValue) -> newValue));
+				.collect(Collectors.toMap(Variable::getName, Function.identity(), (_, newValue) -> newValue));
 	}
 
 	@Override
@@ -228,7 +229,7 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 		if (declaration.isArray()) {
 			if (declaration.getRanges().isEmpty()) {
 				return STCoreUtil.newArrayType(type,
-						declaration.getCount().stream().map(unused -> DataFactory.eINSTANCE.createSubrange()).toList());
+						declaration.getCount().stream().map(_ -> DataFactory.eINSTANCE.createSubrange()).toList());
 			}
 			final List<Subrange> subranges = new ArrayList<>(declaration.getRanges().size());
 			for (final STExpression range : declaration.getRanges()) {
@@ -250,26 +251,47 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 
 	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
 			final STInitializerExpression expression) throws EvaluatorException, InterruptedException {
+		return evaluateInitializerExpression(variable, expression, null);
+	}
+
+	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
+			final STInitializerExpression expression, final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		return switch (expression) {
 		case null -> variable;
 		case final STElementaryInitializerExpression elementaryInitializerExpression ->
-			evaluateInitializerExpression(variable, elementaryInitializerExpression);
+			evaluateInitializerExpression(variable, elementaryInitializerExpression, explicitlyInitialized);
 		case final STArrayInitializerExpression arrayInitializerExpression ->
-			evaluateInitializerExpression(variable, arrayInitializerExpression);
+			evaluateInitializerExpression(variable, arrayInitializerExpression, explicitlyInitialized);
 		case final STStructInitializerExpression structInitializerExpression ->
-			evaluateInitializerExpression(variable, structInitializerExpression);
+			evaluateInitializerExpression(variable, structInitializerExpression, explicitlyInitialized);
 		default -> throw createUnsupportedOperationException(expression);
 		};
 	}
 
 	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
 			final STElementaryInitializerExpression expression) throws EvaluatorException, InterruptedException {
+		return evaluateInitializerExpression(variable, expression, null);
+	}
+
+	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
+			final STElementaryInitializerExpression expression, final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		variable.setValue(evaluateExpression(expression.getValue()));
+		if (explicitlyInitialized != null) {
+			explicitlyInitialized.add(variable);
+		}
 		return variable;
 	}
 
 	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
 			final STArrayInitializerExpression expression) throws EvaluatorException, InterruptedException {
+		return evaluateInitializerExpression(variable, expression, null);
+	}
+
+	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
+			final STArrayInitializerExpression expression, final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		if (variable instanceof GenericVariable) {
 			variable.setValue(new ArrayValue((ArrayType) expression.getResultType()));
 		}
@@ -281,7 +303,8 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 				if (index >= size) {
 					return variable; // ignore excess initializers
 				}
-				evaluateInitializerExpression(value.getRaw(index), singleArrayInitElement.getInitExpression());
+				evaluateInitializerExpression(value.getRaw(index), singleArrayInitElement.getInitExpression(),
+						explicitlyInitialized);
 				index++;
 			} else if (elem instanceof final STRepeatArrayInitElement repeatArrayInitElement) {
 				final int count = repeatArrayInitElement.getRepetitions().intValueExact();
@@ -290,7 +313,7 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 						if (index >= size) {
 							return variable; // ignore excess initializers
 						}
-						evaluateInitializerExpression(value.getRaw(index), initElement);
+						evaluateInitializerExpression(value.getRaw(index), initElement, explicitlyInitialized);
 						index++;
 					}
 				}
@@ -301,12 +324,19 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 
 	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
 			final STStructInitializerExpression expression) throws EvaluatorException, InterruptedException {
+		return evaluateInitializerExpression(variable, expression, null);
+	}
+
+	protected Variable<?> evaluateInitializerExpression(final Variable<?> variable,
+			final STStructInitializerExpression expression, final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		if (variable instanceof GenericVariable) {
 			variable.setValue(new StructValue((StructuredType) expression.getResultType()));
 		}
 		final StructValue value = (StructValue) variable.getValue();
 		for (final STStructInitElement elem : expression.getValues()) {
-			evaluateInitializerExpression(value.get(elem.getVariable().getName()), elem.getValue());
+			evaluateInitializerExpression(value.get(elem.getVariable().getName()), elem.getValue(),
+					explicitlyInitialized);
 		}
 		return variable;
 	}
@@ -732,9 +762,9 @@ public abstract class StructuredTextEvaluator extends AbstractEvaluator {
 				throw new EvaluatorArrayIndexOutOfBoundsException(indices, arrayValue.getType(), this);
 			}
 		}
-		case final StringValue unused -> new StringCharacterVariable((Variable<StringValue>) receiver,
+		case final StringValue _ -> new StringCharacterVariable((Variable<StringValue>) receiver,
 				ValueOperations.asInteger(evaluateExpression(expr.getIndex().getFirst())));
-		case final WStringValue unused -> new WStringCharacterVariable((Variable<WStringValue>) receiver,
+		case final WStringValue _ -> new WStringCharacterVariable((Variable<WStringValue>) receiver,
 				ValueOperations.asInteger(evaluateExpression(expr.getIndex().getFirst())));
 		case null, default -> throw createUnsupportedOperationException(receiver.getValue());
 		};

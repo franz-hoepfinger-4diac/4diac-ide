@@ -47,9 +47,9 @@ import org.eclipse.fordiac.ide.model.typelibrary.TypeLibraryManager;
 import org.eclipse.fordiac.ide.model.typelibrary.TypeLibraryTags;
 import org.eclipse.fordiac.ide.model.ui.widgets.PackageSelectionProposalProvider;
 import org.eclipse.fordiac.ide.typemanagement.Messages;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.FordiacMessages;
 import org.eclipse.fordiac.ide.ui.widget.TableWidgetFactory;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -350,7 +350,7 @@ public class NewFBTypeWizardPage extends WizardNewFileCreationPage {
 
 		templateTableViewer.setInput(templateList);
 
-		templateTableViewer.addSelectionChangedListener(ev -> handleEvent(null));
+		templateTableViewer.addSelectionChangedListener(_ -> handleEvent(null));
 
 		final GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint = 250;
@@ -447,7 +447,7 @@ public class NewFBTypeWizardPage extends WizardNewFileCreationPage {
 		openTypeCheckbox.setText(Messages.NewFBTypeWizardPage_OpenTypeForEditingWhenDone);
 		openTypeCheckbox.setSelection(true);
 		setPageComplete(validatePage());
-		openTypeCheckbox.addListener(SWT.Selection, ev -> openType = openTypeCheckbox.getSelection());
+		openTypeCheckbox.addListener(SWT.Selection, _ -> openType = openTypeCheckbox.getSelection());
 		return openTypeCheckbox;
 	}
 

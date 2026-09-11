@@ -35,7 +35,7 @@ import org.eclipse.fordiac.ide.library.LibraryManager;
 import org.eclipse.fordiac.ide.library.download.DownloadResult;
 import org.eclipse.fordiac.ide.library.download.DownloadResult.Status;
 import org.eclipse.fordiac.ide.library.ui.wizards.treeviewer.LibraryTreeNode;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -96,7 +96,7 @@ public final class GitLabEndpointSource implements ILibrarySource, IDisposable {
 			final Map<String, List<LeafNode>> packagesAndLeaves) {
 		final LibraryTreeNode projectNode = new LibraryTreeNode(project, project.name());
 		packages.stream().sorted(Comparator.comparing(Package::name))
-				.collect(Collectors.toMap(Package::name, Function.identity(), (first, ignored) -> first,
+				.collect(Collectors.toMap(Package::name, Function.identity(), (first, _) -> first,
 						LinkedHashMap::new))
 				.values().forEach(pack -> {
 					final LibraryTreeNode packageNode = new LibraryTreeNode(pack, pack.name());

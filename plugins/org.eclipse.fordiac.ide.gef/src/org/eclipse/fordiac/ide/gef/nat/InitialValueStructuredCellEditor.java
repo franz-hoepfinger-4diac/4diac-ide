@@ -12,7 +12,10 @@
  *******************************************************************************/
 package org.eclipse.fordiac.ide.gef.nat;
 
+import java.util.Optional;
+
 import org.eclipse.fordiac.ide.gef.dialogs.VariableDialog;
+import org.eclipse.fordiac.ide.model.libraryElement.ITypedElement;
 import org.eclipse.fordiac.ide.ui.FordiacMessages;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -27,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class InitialValueStructuredCellEditor<T> extends InitialValueCellEditor<T> {
 
@@ -58,7 +62,7 @@ public class InitialValueStructuredCellEditor<T> extends InitialValueCellEditor<
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textControl);
 		dialogButton = new Button(composite, SWT.FLAT);
 		dialogButton.setText("\u2026"); //$NON-NLS-1$
-		dialogButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(event -> openDialog()));
+		dialogButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> openDialog()));
 		GridDataFactory.swtDefaults().applyTo(dialogButton);
 		focusListener = new CompositeFocusListener();
 		return textControl;
@@ -68,14 +72,18 @@ public class InitialValueStructuredCellEditor<T> extends InitialValueCellEditor<
 		try {
 			final String initialValue = FordiacMessages.ValueTooLarge.equals(getEditorValue()) ? null
 					: getEditorValue();
-			VariableDialog
-					.open(composite.getShell(), getElementAccessor().getReferenceElement(getRowObject()), initialValue)
-					.ifPresent(this::setEditorValue);
+			openVariableDialog(composite.getShell(), getElementAccessor().getReferenceElement(getRowObject()),
+					initialValue).ifPresent(this::setEditorValue);
 		} finally {
 			if (textControl != null && !textControl.isDisposed()) {
 				textControl.forceFocus();
 			}
 		}
+	}
+
+	protected Optional<String> openVariableDialog(final Shell shell, final ITypedElement element,
+			final String initialValue) {
+		return VariableDialog.open(shell, element, initialValue);
 	}
 
 	@Override

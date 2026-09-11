@@ -80,7 +80,7 @@ final class FBNetworkAnnotations {
 
 	static boolean validateCollisions(final Group group, final DiagnosticChain diagnostics,
 			final Map<Object, Object> context) {
-		return validateCollisions(Optional.of(group), group.getGroupElements(), unused -> true, diagnostics, context,
+		return validateCollisions(Optional.of(group), group.getGroupElements(), _ -> true, diagnostics, context,
 				getRootProject(group));
 	}
 
@@ -174,8 +174,8 @@ final class FBNetworkAnnotations {
 				ValidationPreferences.getDiagnosticSeverity(ValidationPreferences.COLLISION_SEVERITY,
 						Diagnostic.WARNING, element),
 				LibraryElementValidator.DIAGNOSTIC_SOURCE, LibraryElementValidator.FB_NETWORK__VALIDATE_COLLISIONS,
-				MessageFormat.format(Messages.FBNetworkAnnotations_CollisionMessage, element.getQualifiedName(),
-						other.getQualifiedName()),
+				MessageFormat.format(Messages.FBNetworkAnnotations_CollisionMessage, element.getName(),
+						other.getName()),
 				FordiacMarkerHelper.getDiagnosticData(element,
 						LibraryElementPackage.Literals.POSITIONABLE_ELEMENT__POSITION));
 	}
@@ -186,8 +186,8 @@ final class FBNetworkAnnotations {
 				ValidationPreferences.getDiagnosticSeverity(
 						ValidationPreferences.RIGHT_INTERFACE_BAR_COLLISION_SEVERITY, Diagnostic.WARNING, element),
 				LibraryElementValidator.DIAGNOSTIC_SOURCE, LibraryElementValidator.FB_NETWORK__VALIDATE_COLLISIONS,
-				MessageFormat.format(Messages.FBNetworkAnnotations_InterfaceBarCollisionMessage,
-						element.getQualifiedName(), other.getQualifiedName()),
+				MessageFormat.format(Messages.FBNetworkAnnotations_InterfaceBarCollisionMessage, element.getName(),
+						other.getName()),
 				FordiacMarkerHelper.getDiagnosticData(element,
 						LibraryElementPackage.Literals.POSITIONABLE_ELEMENT__POSITION));
 	}

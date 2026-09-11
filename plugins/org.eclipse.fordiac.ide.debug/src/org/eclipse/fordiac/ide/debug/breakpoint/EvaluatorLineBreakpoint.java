@@ -21,7 +21,7 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.LineBreakpoint;
 import org.eclipse.fordiac.ide.debug.CommonEvaluatorDebugger;
 import org.eclipse.fordiac.ide.debug.EvaluatorDebugStackFrame;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 
 public abstract class EvaluatorLineBreakpoint extends LineBreakpoint implements IEvaluatorBreakpoint {
 
@@ -38,7 +38,7 @@ public abstract class EvaluatorLineBreakpoint extends LineBreakpoint implements 
 	}
 
 	protected EvaluatorLineBreakpoint(final IResource resource, final int lineNumber) throws CoreException {
-		run(getMarkerRule(resource), monitor -> createMarker(resource, lineNumber));
+		run(getMarkerRule(resource), _ -> createMarker(resource, lineNumber));
 	}
 
 	protected IMarker createMarker(final IResource resource, final int lineNumber) throws CoreException {

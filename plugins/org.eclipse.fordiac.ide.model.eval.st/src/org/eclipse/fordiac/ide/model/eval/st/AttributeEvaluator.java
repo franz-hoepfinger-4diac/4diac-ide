@@ -13,11 +13,9 @@
 package org.eclipse.fordiac.ide.model.eval.st;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.fordiac.ide.model.data.AnyType;
 import org.eclipse.fordiac.ide.model.data.InternalDataType;
@@ -30,7 +28,6 @@ import org.eclipse.fordiac.ide.model.eval.value.ValueOperations;
 import org.eclipse.fordiac.ide.model.eval.variable.Variable;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableEvaluator;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableOperations;
-import org.eclipse.fordiac.ide.model.helpers.PackageNameHelper;
 import org.eclipse.fordiac.ide.model.libraryElement.Attribute;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.structuredtextalgorithm.util.StructuredTextParseUtil;
@@ -84,12 +81,26 @@ public class AttributeEvaluator extends StructuredTextEvaluator implements Varia
 
 	@Override
 	public Variable<?> evaluateVariable() throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(null);
+	}
+
+	@Override
+	public Variable<?> evaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(explicitlyInitialized);
+	}
+
+	private Variable<?> doEvaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		prepare();
 		final Variable<?> result = VariableOperations.newVariable(attribute.getName(), evaluateResultType());
 		if (parseResult != null && parseResult.getInitializerExpression() != null) {
-			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression());
+			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression(), explicitlyInitialized);
 		} else if (attribute.getType() instanceof InternalDataType && attribute.getValue() != null) {
 			result.setValue(ValueOperations.wrapValue(attribute.getValue(), result.getType()));
+			if (explicitlyInitialized != null) {
+				explicitlyInitialized.add(result);
+			}
 		}
 		return result;
 	}
@@ -112,30 +123,6 @@ public class AttributeEvaluator extends StructuredTextEvaluator implements Varia
 	public boolean validateResultType(final List<String> errors, final List<String> warnings, final List<String> infos)
 			throws EvaluatorException, InterruptedException {
 		return true;
-	}
-
-	@Override
-	public Set<String> getDependencies() {
-		return Stream.concat(getTypeDependencies().stream(), getInitialValueDependencies().stream())
-				.collect(Collectors.toSet());
-	}
-
-	protected Set<String> getTypeDependencies() {
-		if (attribute.getAttributeDeclaration() != null) {
-			return Set.of(PackageNameHelper.getFullTypeName(attribute.getAttributeDeclaration()));
-		}
-		if (attribute.getType() instanceof AnyType) {
-			return Set.of(PackageNameHelper.getFullTypeName(attribute.getType()));
-		}
-		return Collections.emptySet();
-	}
-
-	protected Set<String> getInitialValueDependencies() {
-		prepare();
-		if (parseResult != null) {
-			return StructuredTextParseUtil.collectUsedTypes(parseResult);
-		}
-		return Collections.emptySet();
 	}
 
 	@Override

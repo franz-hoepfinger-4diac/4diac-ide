@@ -13,11 +13,9 @@
 package org.eclipse.fordiac.ide.model.eval.st;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.fordiac.ide.model.data.AnyStringType;
 import org.eclipse.fordiac.ide.model.data.DataFactory;
@@ -31,7 +29,6 @@ import org.eclipse.fordiac.ide.model.eval.value.ValueOperations;
 import org.eclipse.fordiac.ide.model.eval.variable.Variable;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableEvaluator;
 import org.eclipse.fordiac.ide.model.eval.variable.VariableOperations;
-import org.eclipse.fordiac.ide.model.helpers.PackageNameHelper;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.model.libraryElement.VarDeclaration;
 import org.eclipse.fordiac.ide.structuredtextalgorithm.util.StructuredTextParseUtil;
@@ -116,10 +113,21 @@ public class VarDeclarationEvaluator extends StructuredTextEvaluator implements 
 
 	@Override
 	public Variable<?> evaluateVariable() throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(null);
+	}
+
+	@Override
+	public Variable<?> evaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
+		return doEvaluateVariable(explicitlyInitialized);
+	}
+
+	private Variable<?> doEvaluateVariable(final Set<Variable<?>> explicitlyInitialized)
+			throws EvaluatorException, InterruptedException {
 		prepareInitialValue();
-		final Variable<?> result = VariableOperations.newVariable(varDeclaration.getName(), evaluateResultType());
+		final Variable<?> result = VariableOperations.newVariableWithoutDeclaredInitialValue(varDeclaration);
 		if (parseResult != null && parseResult.getInitializerExpression() != null) {
-			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression());
+			evaluateInitializerExpression(result, trap(parseResult).getInitializerExpression(), explicitlyInitialized);
 		}
 		return result;
 	}
@@ -166,7 +174,7 @@ public class VarDeclarationEvaluator extends StructuredTextEvaluator implements 
 		if (declaration.isArray()) {
 			if (declaration.getRanges().isEmpty()) {
 				return STCoreUtil.newArrayType(type,
-						declaration.getCount().stream().map(unused -> DataFactory.eINSTANCE.createSubrange()).toList());
+						declaration.getCount().stream().map(_ -> DataFactory.eINSTANCE.createSubrange()).toList());
 			}
 			final List<Subrange> subranges = new ArrayList<>(declaration.getRanges().size());
 			for (final STExpression range : declaration.getRanges()) {
@@ -175,31 +183,6 @@ public class VarDeclarationEvaluator extends StructuredTextEvaluator implements 
 			return STCoreUtil.newArrayType(type, subranges);
 		}
 		return type;
-	}
-
-	@Override
-	public Set<String> getDependencies() {
-		return Stream.of(getTypeDependencies(), getInitialValueDependencies()).flatMap(Set::stream)
-				.collect(Collectors.toSet());
-	}
-
-	protected Set<String> getTypeDependencies() {
-		if (varDeclaration.getBlockFBNetworkElement() == null) {
-			prepareResultType();
-			if (parseResultType != null) {
-				return StructuredTextParseUtil.collectUsedTypes(parseResultType);
-			}
-			return Set.of(PackageNameHelper.getFullTypeName(varDeclaration.getType()));
-		}
-		return Collections.emptySet();
-	}
-
-	protected Set<String> getInitialValueDependencies() {
-		prepareInitialValue();
-		if (parseResult != null) {
-			return StructuredTextParseUtil.collectUsedTypes(parseResult);
-		}
-		return Collections.emptySet();
 	}
 
 	@Override

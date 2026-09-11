@@ -37,7 +37,7 @@ import org.eclipse.fordiac.ide.model.typelibrary.TypeEntry;
 import org.eclipse.fordiac.ide.model.typelibrary.TypeLibraryManager;
 import org.eclipse.fordiac.ide.systemmanagement.SystemManager;
 import org.eclipse.fordiac.ide.typemanagement.Messages;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -119,7 +119,7 @@ public class OpenTypeHandler extends AbstractHandler {
 			final Combo combo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
 
-			combo.addListener(SWT.Selection, e -> {
+			combo.addListener(SWT.Selection, _ -> {
 				final int selectionIndex = combo.getSelectionIndex();
 				selectedProject = (selectionIndex == 0) ? null : combo.getItem(selectionIndex);
 				applyFilter();

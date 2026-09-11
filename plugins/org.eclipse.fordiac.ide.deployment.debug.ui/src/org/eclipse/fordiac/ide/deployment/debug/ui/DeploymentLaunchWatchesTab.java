@@ -31,7 +31,7 @@ import org.eclipse.fordiac.ide.deployment.debug.DeploymentLaunchConfigurationAtt
 import org.eclipse.fordiac.ide.deployment.debug.DeploymentLaunchConfigurationAttributes.DeploymentLaunchWatchpoint;
 import org.eclipse.fordiac.ide.deployment.debug.breakpoint.DeploymentWatchpoint;
 import org.eclipse.fordiac.ide.model.libraryElement.AutomationSystem;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -101,12 +101,12 @@ public class DeploymentLaunchWatchesTab extends AbstractLaunchConfigurationTab {
 		addButton = new Button(comp, SWT.PUSH);
 		addButton.setText(Messages.DeploymentLaunchWatchesTab_AddButton);
 		addButton.setEnabled(false);
-		addButton.addSelectionListener(widgetSelectedAdapter(e -> handleAddButtonSelected()));
+		addButton.addSelectionListener(widgetSelectedAdapter(_ -> handleAddButtonSelected()));
 
 		removeButton = new Button(comp, SWT.PUSH);
 		removeButton.setText(Messages.DeploymentLaunchWatchesTab_RemoveButton);
 		removeButton.setEnabled(false);
-		removeButton.addSelectionListener(widgetSelectedAdapter(e -> handleRemoveButtonSelected()));
+		removeButton.addSelectionListener(widgetSelectedAdapter(_ -> handleRemoveButtonSelected()));
 
 		GridLayoutFactory.swtDefaults().generateLayout(comp);
 

@@ -58,7 +58,7 @@ import org.eclipse.fordiac.ide.model.libraryElement.Device;
 import org.eclipse.fordiac.ide.model.libraryElement.INamedElement;
 import org.eclipse.fordiac.ide.model.libraryElement.Resource;
 import org.eclipse.fordiac.ide.model.typelibrary.TypeLibrary;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 
 public class DeploymentDebugDevice extends DeploymentDebugElement implements IDeploymentDebugTarget {
 
@@ -82,7 +82,6 @@ public class DeploymentDebugDevice extends DeploymentDebugElement implements IDe
 		this.pollingInterval = pollingInterval;
 		this.launchWatches = launchWatches;
 
-		debugTarget.getLaunch().addDebugTarget(this);
 		deviceManagementExecutor = IDeviceManagementExecutorService.of(new SharedWatchDeviceManagementInteractor(
 				DeviceManagementInteractorFactory.INSTANCE.getDeviceManagementInteractor(device, null, profile)));
 
@@ -128,7 +127,7 @@ public class DeploymentDebugDevice extends DeploymentDebugElement implements IDe
 	protected void updateWatches(final Response response) {
 		incrementVariableUpdateCount();
 		final DeploymentDebugWatchData watchData = new DeploymentDebugWatchData(response);
-		try (EvaluatorCache cache = EvaluatorCache.open()) {
+		try (EvaluatorCache _ = EvaluatorCache.open()) {
 			watches.values().forEach(watch -> watch.updateValue(watchData));
 		}
 		getPrimaryDebugTarget().updateWatches(false);
@@ -149,7 +148,7 @@ public class DeploymentDebugDevice extends DeploymentDebugElement implements IDe
 					pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
 			deviceManagementExecutor.readWatchesPeriodically(this::updateWatches, this::handleDeviceError,
 					pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
-			try (EvaluatorCache cache = EvaluatorCache.open()) {
+			try (EvaluatorCache _ = EvaluatorCache.open()) {
 				launchWatches.forEach(this::addWatch);
 				Stream.of(DebugPlugin.getDefault().getBreakpointManager().getBreakpoints())
 						.forEachOrdered(this::breakpointAdded);

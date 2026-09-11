@@ -64,7 +64,6 @@ import org.eclipse.fordiac.ide.model.libraryElement.FBNetworkElement;
 import org.eclipse.fordiac.ide.model.libraryElement.IInterfaceElement;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElementPackage;
-import org.eclipse.fordiac.ide.model.libraryElement.MemberVarDeclaration;
 import org.eclipse.fordiac.ide.model.libraryElement.SubApp;
 import org.eclipse.fordiac.ide.model.libraryElement.Value;
 import org.eclipse.fordiac.ide.model.libraryElement.VarDeclaration;
@@ -72,8 +71,8 @@ import org.eclipse.fordiac.ide.model.ui.UtilityMarkerHelper;
 import org.eclipse.fordiac.ide.model.ui.annotation.GraphicalAnnotationModelEvent;
 import org.eclipse.fordiac.ide.model.ui.editors.AdvancedScrollingGraphicalViewer;
 import org.eclipse.fordiac.ide.model.ui.editors.HandlerHelper;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.preferences.PreferenceStoreProvider;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.DragTracker;
 import org.eclipse.gef.EditPart;
@@ -194,9 +193,6 @@ public abstract class InterfaceEditPart extends AbstractConnectableEditPart
 	}
 
 	private static String getPinName(final IInterfaceElement pin) {
-		if (pin instanceof final MemberVarDeclaration memberVarDecl) {
-			return memberVarDecl.getDisplayName();
-		}
 		return pin.getRelativeName(pin.getBlockFBNetworkElement());
 	}
 
@@ -349,7 +345,7 @@ public abstract class InterfaceEditPart extends AbstractConnectableEditPart
 			}
 
 			if (labelText.length() > maxWidth) {
-				if (getModel().eContainer() instanceof VarDeclaration) {
+				if (getModel().isMemberAccessPin()) {
 					// is member access label truncate on front
 					return getTruncationString()
 							+ labelText.substring(labelText.length() - maxWidth + 1, labelText.length());

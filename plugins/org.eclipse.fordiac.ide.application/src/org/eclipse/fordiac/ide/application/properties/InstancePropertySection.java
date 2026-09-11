@@ -21,6 +21,7 @@ import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+import org.eclipse.fordiac.ide.application.properties.memberaccess.MemberAccessViewer;
 import org.eclipse.fordiac.ide.model.libraryElement.TypedSubApp;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -44,6 +45,7 @@ public class InstancePropertySection extends AbstractInstanceSection {
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(mainContainer);
 
 		createFBInfoGroup(mainContainer);
+		createCommentGroup(mainContainer);
 		createTableSection(mainContainer);
 	}
 
@@ -78,7 +80,9 @@ public class InstancePropertySection extends AbstractInstanceSection {
 		GridLayoutFactory.fillDefaults().numColumns(TWO_COLUMNS).applyTo(fbInfoGroup);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(fbInfoGroup);
 		createNameInput(fbInfoGroup);
+	}
 
+	protected void createCommentGroup(final Composite parent) {
 		final Composite fbCommentComp = getWidgetFactory().createComposite(parent);
 		GridLayoutFactory.fillDefaults().numColumns(TWO_COLUMNS).applyTo(fbCommentComp);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(fbCommentComp);

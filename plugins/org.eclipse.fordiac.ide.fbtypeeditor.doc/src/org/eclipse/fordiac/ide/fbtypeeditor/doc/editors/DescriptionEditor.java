@@ -31,8 +31,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.fordiac.ide.model.commands.change.ChangeDocumentationCommand;
 import org.eclipse.fordiac.ide.model.ui.editors.LibraryElementProvider;
 import org.eclipse.fordiac.ide.typeeditor.ITypeEditorPage;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.imageprovider.FordiacImage;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -166,7 +166,7 @@ public class DescriptionEditor extends EditorPart implements ITypeEditorPage {
 
 			GridDataFactory.fillDefaults().grab(true, true).applyTo(editor);
 			editor.setText(getType().getDocumentation());
-			editor.addModifyListener(e -> {
+			editor.addModifyListener(_ -> {
 				if (editor != null && editor.getText() != null
 						&& !editor.getText().equals(getType().getDocumentation())) {
 					executeCommand(new ChangeDocumentationCommand(getType(), editor.getText()));
@@ -174,7 +174,7 @@ public class DescriptionEditor extends EditorPart implements ITypeEditorPage {
 			});
 			GridDataFactory.fillDefaults().grab(true, true).applyTo(editor);
 			editor.setText(getType().getDocumentation());
-			editor.addModifyListener(e -> {
+			editor.addModifyListener(_ -> {
 				if (editor != null && editor.getText() != null
 						&& !editor.getText().equals(getType().getDocumentation())) {
 					executeCommand(new ChangeDocumentationCommand(getType(), editor.getText()));

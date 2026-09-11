@@ -50,7 +50,8 @@ public class FBDebugViewClockWidget extends DebugClockWidget {
 
 		@Override
 		public void update(final Collection<? extends Variable<?>> variables, final Evaluator evaluator) {
-			if (process != null && evaluator == process.getEvaluator() && !refreshing) {
+			final EvaluatorProcess curProcess = process;
+			if (curProcess != null && evaluator == curProcess.getEvaluator() && !refreshing) {
 				refreshing = true;
 				Display.getDefault().asyncExec(FBDebugViewClockWidget.this::refresh);
 			}
@@ -68,7 +69,7 @@ public class FBDebugViewClockWidget extends DebugClockWidget {
 		applyButton = new Button(composite, SWT.PUSH);
 		applyButton.setText(Messages.FBDebugViewClockWidget_Apply);
 		applyButton.setEnabled(false);
-		applyButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> performApply()));
+		applyButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> performApply()));
 		GridDataFactory.swtDefaults().applyTo(applyButton);
 		return composite;
 	}
@@ -100,13 +101,13 @@ public class FBDebugViewClockWidget extends DebugClockWidget {
 	}
 
 	public void refresh(final boolean force) {
-		if (process != null && (force || !isDirty())) {
+		if (process != null && (force || !isDirty()) && !isDisposed()) {
 			final Clock realtimeClock = process.getExecutor().getRealtimeClock();
 			final Clock monotonicClock = process.getExecutor().getMonotonicClock();
 			setRealtimeClockValue(realtimeClock.instant());
 			setMonotonicClockValue(monotonicClock.instant());
 			switch (monotonicClock) {
-			case final AbstractEvaluator.MonotonicClock unused -> setSelectedClockMode(FBDebugClockMode.SYSTEM);
+			case final AbstractEvaluator.MonotonicClock _ -> setSelectedClockMode(FBDebugClockMode.SYSTEM);
 			case final AbstractEvaluator.IntervalClock intervalClock -> {
 				setClockInterval(intervalClock.getInterval());
 				setSelectedClockMode(FBDebugClockMode.INTERVAL);

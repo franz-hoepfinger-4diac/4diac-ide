@@ -40,7 +40,7 @@ import org.eclipse.fordiac.ide.library.model.library.Product;
 import org.eclipse.fordiac.ide.library.model.library.Required;
 import org.eclipse.fordiac.ide.library.model.library.VersionInfo;
 import org.eclipse.fordiac.ide.library.model.library.util.LibraryResourceFactoryImpl;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.osgi.framework.Version;
 
 public final class ManifestHelper {
@@ -99,7 +99,7 @@ public final class ManifestHelper {
 		if (container == null || !container.isDirectory()) {
 			return null;
 		}
-		final File[] files = container.listFiles((dir, name) -> MANIFEST_FILENAME.equals(name));
+		final File[] files = container.listFiles((_, name) -> MANIFEST_FILENAME.equals(name));
 		if (files.length == 0) {
 			return null;
 		}

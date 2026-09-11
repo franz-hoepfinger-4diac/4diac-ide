@@ -23,8 +23,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.fordiac.ide.fbrtlauncher.preferences.FbrtPreferenceConstants;
 import org.eclipse.fordiac.ide.runtime.RuntimeLaunchTab;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.widget.DirectoryChooserControl;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -59,7 +59,7 @@ public class FBRTLaunchTab extends RuntimeLaunchTab {
 		setControl(comp);
 
 		workingDirChooser = new DirectoryChooserControl(comp, SWT.NONE, Messages.FBRTPreferencePage_FBRTLocation, true);
-		workingDirChooser.addChooserValueChangedListener(newVal -> scheduleUpdateJob());
+		workingDirChooser.addChooserValueChangedListener(_ -> scheduleUpdateJob());
 
 		createDevType(comp);
 		createPortSelection(comp);

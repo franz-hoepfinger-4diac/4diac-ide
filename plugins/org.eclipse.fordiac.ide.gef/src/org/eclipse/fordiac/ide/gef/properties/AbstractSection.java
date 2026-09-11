@@ -140,7 +140,7 @@ public abstract class AbstractSection extends AbstractPropertySection implements
 	};
 
 	protected final void notifiyRefresh() {
-		if (shouldRefresh()) {
+		if (shouldRefresh() && !parent.isDisposed()) {
 			parent.getDisplay().asyncExec(() -> {
 				if (!parent.isDisposed()) {
 					refresh();
@@ -150,7 +150,7 @@ public abstract class AbstractSection extends AbstractPropertySection implements
 	}
 
 	protected final void notifiyRefreshAnnotations() {
-		if (shouldRefresh()) {
+		if (shouldRefresh() && !parent.isDisposed()) {
 			parent.getDisplay().asyncExec(() -> {
 				if (!parent.isDisposed()) {
 					refreshAnnotations();
@@ -201,7 +201,7 @@ public abstract class AbstractSection extends AbstractPropertySection implements
 		}
 	}
 
-	private final GraphicalAnnotationModelListener annotationModelListener = event -> notifiyRefreshAnnotations();
+	private final GraphicalAnnotationModelListener annotationModelListener = _ -> notifiyRefreshAnnotations();
 
 	protected void removeAnnotationModelListener() {
 		if (annotationModel != null) {

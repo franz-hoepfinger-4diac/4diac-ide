@@ -44,7 +44,6 @@ import org.eclipse.fordiac.ide.model.libraryElement.CompositeFBType;
 import org.eclipse.fordiac.ide.model.libraryElement.ErrorMarkerInterface;
 import org.eclipse.fordiac.ide.model.libraryElement.FBNetworkElement;
 import org.eclipse.fordiac.ide.model.libraryElement.IInterfaceElement;
-import org.eclipse.fordiac.ide.model.libraryElement.MemberVarDeclaration;
 import org.eclipse.fordiac.ide.model.libraryElement.VarDeclaration;
 import org.eclipse.fordiac.ide.model.ui.widgets.OpenStructMenu;
 import org.eclipse.fordiac.ide.ui.FordiacMessages;
@@ -133,7 +132,7 @@ public class InterfaceElementSection extends AbstractDoubleColumnSection {
 		getWidgetFactory().createLabel(composite, FordiacMessages.Comment + ":"); //$NON-NLS-1$
 		instanceCommentText = createGroupText(composite, true);
 		instanceCommentText.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
-		instanceCommentText.addModifyListener(e -> {
+		instanceCommentText.addModifyListener(_ -> {
 			removeContentAdapter();
 			executeCommand(new ChangeCommentCommand(getType(), instanceCommentText.getText()));
 			addContentAdapter();
@@ -150,7 +149,7 @@ public class InterfaceElementSection extends AbstractDoubleColumnSection {
 		currentVarConfigLabel = getWidgetFactory().createLabel(composite, FordiacMessages.VarConfig + ":"); //$NON-NLS-1$
 		currentVarConfigCheckBox = getWidgetFactory().createButton(composite, null, SWT.CHECK);
 		currentVarConfigCheckBox.addListener(SWT.Selection,
-				event -> executeCommand(new ChangeVarConfigurationCommand((VarDeclaration) getType(),
+				_ -> executeCommand(new ChangeVarConfigurationCommand((VarDeclaration) getType(),
 						currentVarConfigCheckBox.getSelection())));
 
 		infoSection.setClient(composite);
@@ -207,7 +206,7 @@ public class InterfaceElementSection extends AbstractDoubleColumnSection {
 
 		final DataType dataType = getDataType();
 		if (dataType != null) {
-			openEditorListener = ev -> OpenStructMenu.openStructEditor(dataType.getTypeEntry().getFile());
+			openEditorListener = _ -> OpenStructMenu.openStructEditor(dataType.getTypeEntry().getFile());
 			openEditorButton.addListener(SWT.Selection, openEditorListener);
 			openEditorButton.setEnabled((dataType instanceof StructuredType || dataType instanceof AdapterType)
 					&& !IecTypes.GenericTypes.isAnyType(dataType));
@@ -259,8 +258,7 @@ public class InterfaceElementSection extends AbstractDoubleColumnSection {
 	}
 
 	private String getPinName() {
-		final String pinName = (getType() instanceof final MemberVarDeclaration memVar) ? memVar.getDisplayName()
-				: getType().getName();
+		final String pinName = getType().getRelativeName(getType().getBlockFBNetworkElement());
 		return pinName != null ? pinName : ""; //$NON-NLS-1$
 	}
 

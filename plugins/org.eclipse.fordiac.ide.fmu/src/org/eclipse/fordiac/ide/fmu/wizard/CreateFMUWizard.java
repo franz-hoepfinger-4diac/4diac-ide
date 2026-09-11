@@ -24,8 +24,8 @@ import org.eclipse.fordiac.ide.fmu.Messages;
 import org.eclipse.fordiac.ide.fmu.preferences.FMUPreferenceConstants;
 import org.eclipse.fordiac.ide.model.libraryElement.Device;
 import org.eclipse.fordiac.ide.model.libraryElement.Resource;
-import org.eclipse.fordiac.ide.ui.FordiacLogHelper;
 import org.eclipse.fordiac.ide.ui.providers.DialogSettingsProvider;
+import org.eclipse.fordiac.ide.util.FordiacLogHelper;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -158,7 +158,7 @@ public class CreateFMUWizard extends Wizard implements IExportWizard {
 
 	private static List<Resource> getWorkLoadEntryList(final Map<Device, List<Resource>> toDeploy,
 			final Device device) {
-		return toDeploy.computeIfAbsent(device, dev -> new ArrayList<>());
+		return toDeploy.computeIfAbsent(device, _ -> new ArrayList<>());
 	}
 
 }

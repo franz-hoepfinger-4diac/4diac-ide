@@ -16,9 +16,9 @@ package org.eclipse.fordiac.ide.debug.replaydebugging.ui.model;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.fordiac.ide.debug.replaydebugging.core.ReplayNavigator;
 import org.eclipse.fordiac.ide.debug.replaydebugging.core.Timeline;
@@ -35,7 +35,7 @@ public class Session {
 	public static final String PROPERTY_SESSION_CHANGED = "sessionChanged"; //$NON-NLS-1$
 	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-	private final Map<String, Device> devices = new HashMap<>();
+	private final Map<String, Device> devices = new ConcurrentHashMap<>();
 
 	public List<Device> getDevices() {
 		return new ArrayList<>(devices.values());
@@ -71,7 +71,7 @@ public class Session {
 		// notify only if a new device was added
 		final boolean shouldNotify = !devices.containsKey(deviceName);
 
-		final var device = devices.computeIfAbsent(deviceName, arg -> new Device(deviceName));
+		final var device = devices.computeIfAbsent(deviceName, _ -> new Device(deviceName));
 		device.addReplayNavigator(navigator);
 		if (shouldNotify) {
 			propertyChangeSupport.firePropertyChange(PROPERTY_SESSION_CHANGED, null, null);

@@ -90,10 +90,6 @@ public class BulkEditorControls {
 	private Label subappHierarchyScopeLabel;
 	private List<URI> selectedSubApps = Collections.emptyList();
 
-	// Footer
-	private Composite addDeleteComposite;
-	private Label searchInformation;
-
 	public BulkEditorControls(final BulkEditorSettings settings, final BulkEditor editor,
 			final List<URI> initialSelectedSubApps) {
 		this.settings = settings;
@@ -106,7 +102,8 @@ public class BulkEditorControls {
 		createSearchWhereGroup(parent);
 		createSearchInGroup(parent);
 		createScopeGroup(parent);
-		createSearchButtonRow(parent);
+		WidgetFactory.button(SWT.PUSH).text(Messages.Search).onSelect(_ -> editor.onSearchRequested())
+				.create(parent);
 	}
 
 	private void createModeSelectionComposite(final Composite parent) {
@@ -117,7 +114,7 @@ public class BulkEditorControls {
 		modeSelectionDropDown = new Combo(modeSelectionComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
 		modeSelectionDropDown.setItems(Messages.Variable, Messages.Attribute);
 		modeSelectionDropDown.select(BulkEditorMode.getComboBoxIndex(settings.modeSelection));
-		modeSelectionDropDown.addListener(SWT.Selection, event -> {
+		modeSelectionDropDown.addListener(SWT.Selection, _ -> {
 			final int prevIndex = BulkEditorMode.getComboBoxIndex(settings.modeSelection);
 			if (modeSelectionDropDown.getSelectionIndex() == prevIndex) {
 				return;
@@ -137,13 +134,10 @@ public class BulkEditorControls {
 			changeSearchWhereGroupFilter(newMode);
 			parent.getParent().layout();
 			changedSearchParameter = false;
-			if (searchInformation != null) {
-				searchInformation.setText(""); //$NON-NLS-1$
-			}
 			editor.onModeChanged(newMode);
 		});
 
-		advancedButton = WidgetFactory.button(SWT.TOGGLE).text(Messages.Advanced).onSelect(event -> {
+		advancedButton = WidgetFactory.button(SWT.TOGGLE).text(Messages.Advanced).onSelect(_ -> {
 			final BulkEditorMode newMode = BulkEditorMode.resolve(modeSelectionDropDown.getSelectionIndex(),
 					advancedButton.getSelection());
 			settings.modeSelection = newMode;
@@ -158,7 +152,7 @@ public class BulkEditorControls {
 
 	private void createSearchWhereGroup(final Composite parent) {
 		searchWhereGroup = BulkEditorWidgetUtils.createCollapsibleGroup(parent, Messages.SearchWhere,
-				button -> button.addListener(SWT.Selection, event -> {
+				button -> button.addListener(SWT.Selection, _ -> {
 					if (searchFilter != null && !searchFilter.isDisposed()) {
 						searchFilter.clear();
 					}
@@ -201,7 +195,7 @@ public class BulkEditorControls {
 	private void createSearchInGroup(final Composite parent) {
 		final Group searchGroup = BulkEditorWidgetUtils.createCollapsibleGroup(parent, Messages.SearchIn,
 				button -> this.searchInClearButton = button);
-		this.searchInClearButton.addListener(SWT.Selection, event -> {
+		this.searchInClearButton.addListener(SWT.Selection, _ -> {
 			fbSubappTypesFilter.clear();
 			fbTypedSubappInstanceFilter.clear();
 			untypedSubappFilter.clear();
@@ -228,7 +222,7 @@ public class BulkEditorControls {
 				b -> settings.attributeTypes = b.booleanValue());
 
 		ignoreLinkedLibrariesButton = WidgetFactory.button(SWT.CHECK).text(Messages.IgnoreLinkedLibraries)
-				.onSelect(event -> settings.ignoreLinkedLibraries = ignoreLinkedLibrariesButton.getSelection())
+				.onSelect(_ -> settings.ignoreLinkedLibraries = ignoreLinkedLibrariesButton.getSelection())
 				.create(searchGroup);
 		ignoreLinkedLibrariesButton.setSelection(settings.ignoreLinkedLibraries);
 		final GridData buttonLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -250,18 +244,18 @@ public class BulkEditorControls {
 		final Button categorySelectionButton = WidgetFactory.button(SWT.CHECK).text(name)
 				.create(searchInCategorySubComposite);
 		categorySelectionButton.addListener(SWT.Selection,
-				event -> buttonListener.accept(Boolean.valueOf(categorySelectionButton.getSelection())));
+				_ -> buttonListener.accept(Boolean.valueOf(categorySelectionButton.getSelection())));
 		categorySelectionButton.setSelection(initialSelection);
 
 		final FilterComposite filterComposite = new FilterComposite(searchInCategoryComposite, SWT.NONE,
 				LIST_WITHOUT_VALUE, settings, subSettingsReferencesNames);
 
 		final Twistie expandFilterCompositeTwistie = new Twistie(searchInCategorySubComposite, SWT.NONE);
-		expandFilterCompositeTwistie.addListener(SWT.MouseUp, event -> BulkEditorWidgetUtils
+		expandFilterCompositeTwistie.addListener(SWT.MouseUp, _ -> BulkEditorWidgetUtils
 				.updateVisibility(expandFilterCompositeTwistie.isExpanded(), filterComposite));
 		BulkEditorWidgetUtils.updateVisibility(false, filterComposite);
 
-		searchInClearButton.addListener(SWT.Selection, event -> {
+		searchInClearButton.addListener(SWT.Selection, _ -> {
 			categorySelectionButton.setSelection(true);
 			categorySelectionButton.notifyListeners(SWT.Selection, null);
 			expandFilterCompositeTwistie.setExpanded(false);
@@ -284,7 +278,7 @@ public class BulkEditorControls {
 		projectScopeButton = WidgetFactory.button(SWT.RADIO)
 				.text(MessageFormat.format(Messages.Project, editor.getProject().getName())).create(groupContent);
 		projectScopeButton.setSelection(settings.scope == ScopeOption.PROJECT);
-		projectScopeButton.addListener(SWT.Selection, event -> {
+		projectScopeButton.addListener(SWT.Selection, _ -> {
 			if (projectScopeButton.getSelection()) {
 				settings.scope = ScopeOption.PROJECT;
 			}
@@ -292,7 +286,7 @@ public class BulkEditorControls {
 
 		workspaceScopeButton = WidgetFactory.button(SWT.RADIO).text(Messages.Workspace).create(groupContent);
 		workspaceScopeButton.setSelection(settings.scope == ScopeOption.WORKSPACE);
-		workspaceScopeButton.addListener(SWT.Selection, event -> {
+		workspaceScopeButton.addListener(SWT.Selection, _ -> {
 			if (workspaceScopeButton.getSelection()) {
 				settings.scope = ScopeOption.WORKSPACE;
 			}
@@ -301,7 +295,7 @@ public class BulkEditorControls {
 		subappHierarchyScopeButton = WidgetFactory.button(SWT.RADIO).text(Messages.SubappHierarchy)
 				.create(groupContent);
 		subappHierarchyScopeButton.setSelection(settings.scope == ScopeOption.SUBAPP_HIERARCHY);
-		subappHierarchyScopeButton.addListener(SWT.Selection, event -> {
+		subappHierarchyScopeButton.addListener(SWT.Selection, _ -> {
 			if (subappHierarchyScopeButton.getSelection()) {
 				settings.scope = ScopeOption.SUBAPP_HIERARCHY;
 			}
@@ -311,7 +305,7 @@ public class BulkEditorControls {
 
 		subappHierarchyScopeSearchButton = WidgetFactory.button(SWT.NONE).text(Messages.SelectSubappHierarchy)
 				.create(groupContent);
-		subappHierarchyScopeSearchButton.addListener(SWT.Selection, event -> {
+		subappHierarchyScopeSearchButton.addListener(SWT.Selection, _ -> {
 			if (subappHierarchyScopeButton.getSelection()) {
 				openScopeDialog();
 			}
@@ -361,22 +355,6 @@ public class BulkEditorControls {
 		subappHierarchyScopeLabel.setText(text);
 	}
 
-	private void createSearchButtonRow(final Composite parent) {
-		final Composite composite = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(0, 0).generateLayout(composite);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		WidgetFactory.button(SWT.PUSH).text(Messages.Search).onSelect(event -> editor.onSearchRequested())
-				.create(composite);
-
-		addDeleteComposite = new Composite(composite, 0);
-		addDeleteComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		addDeleteComposite.setLayout(GridLayoutFactory.fillDefaults().spacing(0, 0).create());
-
-		searchInformation = WidgetFactory.label(SWT.NONE).create(composite);
-		searchInformation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	}
-
 	public SearchParameters collectParameters() {
 		return new SearchParameters(modeSelectionDropDown.getSelectionIndex(), advancedButton.getSelection(),
 				searchText, searchFilter, fbSubappTypesFilter, settings.fbSubappTypes, fbTypedSubappInstanceFilter,
@@ -394,18 +372,8 @@ public class BulkEditorControls {
 		return advancedButton.getSelection();
 	}
 
-	public Composite getAddDeleteComposite() {
-		return addDeleteComposite;
-	}
-
 	public Text getSearchText() {
 		return searchText;
-	}
-
-	public void setSearchInformationText(final String text) {
-		if (searchInformation != null && !searchInformation.isDisposed()) {
-			searchInformation.setText(text);
-		}
 	}
 
 	public boolean hasChangedSearchParameter() {

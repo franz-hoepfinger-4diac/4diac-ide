@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String RemoveFromComparisonCommand_Text;
 
 	public static String OpenStatesComparisonHandler_OpenTableViewError;
+	public static String SelectEventCommand_Text;
 	public static String StatesComparisonView_AlphabeticallyAscendingOrderLabel;
 	public static String StatesComparisonView_AlphabeticallyDescendingOrderLabel;
 	public static String StatesComparisonView_ColumnEnabledLabel;
@@ -47,6 +48,7 @@ public class Messages extends NLS {
 	public static String LaunchConfigurationTab_BrowseButtonText;
 	public static String LaunchConfigurationTab_ComponentsSelectionText;
 	public static String LaunchConfigurationTab_LaunchConfigurationTabName;
+	public static String LaunchConfigurationTab_NoDevicesSelected;
 	public static String LaunchConfigurationTab_RemoteText;
 	public static String LaunchConfigurationTab_ReplayerSectionText;
 	public static String LaunchConfigurationTab_SelectPathDialogText;

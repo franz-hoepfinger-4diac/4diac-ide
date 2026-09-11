@@ -25,6 +25,7 @@
 package org.eclipse.fordiac.ide.model.dataimport;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -40,6 +41,7 @@ import org.eclipse.fordiac.ide.model.libraryElement.Attribute;
 import org.eclipse.fordiac.ide.model.libraryElement.BlockFBNetworkElement;
 import org.eclipse.fordiac.ide.model.libraryElement.Comment;
 import org.eclipse.fordiac.ide.model.libraryElement.Connection;
+import org.eclipse.fordiac.ide.model.libraryElement.Demultiplexer;
 import org.eclipse.fordiac.ide.model.libraryElement.FB;
 import org.eclipse.fordiac.ide.model.libraryElement.FBNetwork;
 import org.eclipse.fordiac.ide.model.libraryElement.FBNetworkElement;
@@ -210,7 +212,7 @@ class FBNetworkImporter extends CommonElementImporter {
 
 	protected <T extends Connection> void parseConnectionList(final EClass conType, final EList<T> connectionlist,
 			final String parentNodeName) throws XMLStreamException, TypeImportException {
-		processChildren(parentNodeName, name -> {
+		processChildren(parentNodeName, _ -> {
 			final T connection = parseConnection(conType);
 
 			if (connection != null) {
@@ -254,7 +256,19 @@ class FBNetworkImporter extends CommonElementImporter {
 	static IInterfaceElement getInterfaceElement(final InterfaceList il, final String interfaceElement,
 			final EClass conType, final boolean isInput) {
 		final Stream<? extends IInterfaceElement> ies = getInterfaceElementList(il, conType, isInput);
-		return ies.filter(ie -> ie.getName().equals(interfaceElement)).findAny().orElse(null);
+		final IInterfaceElement targetIE = ies.filter(ie -> ie.getName().equalsIgnoreCase(interfaceElement)).findAny()
+				.orElse(null);
+		if (targetIE != null) {
+			return targetIE;
+		}
+		if (il.eContainer() instanceof Demultiplexer) {
+			// check if we have a legacy demultiplexer member access pin
+			final var dmuxIE = il.getInterfaceElement(List.of(interfaceElement.split("%")), true); //$NON-NLS-1$
+			if (dmuxIE != null) {
+				return dmuxIE;
+			}
+		}
+		return null;
 	}
 
 	private static Stream<? extends IInterfaceElement> getInterfaceElementList(final InterfaceList il,

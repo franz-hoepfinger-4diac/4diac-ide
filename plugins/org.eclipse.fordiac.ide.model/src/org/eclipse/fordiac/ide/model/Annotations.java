@@ -40,13 +40,11 @@ import org.eclipse.fordiac.ide.model.libraryElement.Attribute;
 import org.eclipse.fordiac.ide.model.libraryElement.AttributeDeclaration;
 import org.eclipse.fordiac.ide.model.libraryElement.AutomationSystem;
 import org.eclipse.fordiac.ide.model.libraryElement.BaseFBType;
-import org.eclipse.fordiac.ide.model.libraryElement.BlockFBNetworkElement;
 import org.eclipse.fordiac.ide.model.libraryElement.Comment;
 import org.eclipse.fordiac.ide.model.libraryElement.CompositeFBType;
 import org.eclipse.fordiac.ide.model.libraryElement.ConfigurableObject;
 import org.eclipse.fordiac.ide.model.libraryElement.Connection;
 import org.eclipse.fordiac.ide.model.libraryElement.DataConnection;
-import org.eclipse.fordiac.ide.model.libraryElement.Demultiplexer;
 import org.eclipse.fordiac.ide.model.libraryElement.Device;
 import org.eclipse.fordiac.ide.model.libraryElement.DeviceType;
 import org.eclipse.fordiac.ide.model.libraryElement.ECState;
@@ -65,8 +63,6 @@ import org.eclipse.fordiac.ide.model.libraryElement.LibraryElement;
 import org.eclipse.fordiac.ide.model.libraryElement.LibraryElementFactory;
 import org.eclipse.fordiac.ide.model.libraryElement.Link;
 import org.eclipse.fordiac.ide.model.libraryElement.Mapping;
-import org.eclipse.fordiac.ide.model.libraryElement.MemberVarDeclaration;
-import org.eclipse.fordiac.ide.model.libraryElement.Multiplexer;
 import org.eclipse.fordiac.ide.model.libraryElement.Resource;
 import org.eclipse.fordiac.ide.model.libraryElement.ResourceType;
 import org.eclipse.fordiac.ide.model.libraryElement.Segment;
@@ -101,60 +97,6 @@ public final class Annotations {
 		// if source element is null it is a connection from a CFB interface element
 		return ((null != c.getSourceElement()) && (null != c.getSourceElement().getFbNetwork())
 				&& (c.getSourceElement().getFbNetwork().eContainer() instanceof Resource));
-	}
-
-	public static boolean isInterfaceConnection(final Connection c) {
-		return isInterfaceConnection(c, null);
-	}
-
-	public static boolean isInterfaceConnection(final Connection c, final FBNetworkElement path) {
-
-		if (c == null) {
-			return false;
-		}
-
-		if (c instanceof EventConnection || c instanceof AdapterConnection) {
-			// TODO Implement
-			return false;
-		}
-
-		// TODO: verify interface detection for CFB
-		final BlockFBNetworkElement s = c.getSourceElement();
-		final BlockFBNetworkElement d = c.getDestinationElement();
-		final EObject container = c.eContainer().eContainer();
-
-		boolean sourceIsInterface = (s == container);
-		boolean destinationIsInterface = (d == container);
-
-		if (sourceIsInterface || destinationIsInterface) {
-			return true;
-		}
-
-		if (s == path) {
-			sourceIsInterface = false;
-		} else if (s instanceof Demultiplexer) {
-			final var connections = s.getInterface().getInputVars().get(0).getInputConnections();
-			sourceIsInterface = !connections.isEmpty() && isInterfaceConnection(connections.get(0), s);
-		} else if (s instanceof Multiplexer) {
-			sourceIsInterface = s.getInterface().getInputVars().stream()
-					.anyMatch(v -> !v.getInputConnections().isEmpty())
-					&& s.getInterface().getInputVars().stream().allMatch(
-							v -> v.getInputConnections().stream().allMatch(co -> isInterfaceConnection(co, s)));
-		}
-
-		if (d == path) {
-			destinationIsInterface = false;
-		} else if (d instanceof Demultiplexer) {
-			destinationIsInterface = d.getInterface().getOutputVars().stream()
-					.anyMatch(v -> !v.getOutputConnections().isEmpty())
-					&& d.getInterface().getOutputVars().stream().allMatch(
-							v -> v.getOutputConnections().stream().allMatch(co -> isInterfaceConnection(co, d)));
-		} else if (d instanceof Multiplexer) {
-			final var connections = d.getInterface().getOutputVars().get(0).getOutputConnections();
-			destinationIsInterface = !connections.isEmpty() && isInterfaceConnection(connections.get(0), d);
-		}
-
-		return (sourceIsInterface || destinationIsInterface);
 	}
 
 	public static void checkifConnectionBroken(final Connection c) {
@@ -390,7 +332,7 @@ public final class Annotations {
 				continue;
 			}
 
-			final MemberVarDeclaration member = LibraryElementFactory.eINSTANCE.createMemberVarDeclaration();
+			final VarDeclaration member = LibraryElementFactory.eINSTANCE.createVarDeclaration();
 			member.setName(keyValue[0]);
 			member.setType(ElementaryTypes.BOOL);
 
@@ -436,35 +378,37 @@ public final class Annotations {
 		}
 
 		return switch (object) {
-		case final AutomationSystem o -> getValueFromTarget(target, AttributeTarget.AutomationSystem);
-		case final Application o -> getValueFromTarget(target, AttributeTarget.Application);
-		case final GlobalConstants o -> getValueFromTarget(target, AttributeTarget.GlobalConstant);
-		case final Connection o -> getValueFromTarget(target, AttributeTarget.Connection);
-		case final Comment o -> getValueFromTarget(target, AttributeTarget.Comment);
-		case final Group o -> getValueFromTarget(target, AttributeTarget.Group);
-		case final Link o -> getValueFromTarget(target, AttributeTarget.Link);
-		case final ServiceSequence o -> getValueFromTarget(target, AttributeTarget.ServiceSequence);
+		case final AutomationSystem _ -> getValueFromTarget(target, AttributeTarget.AutomationSystem);
+		case final Application _ -> getValueFromTarget(target, AttributeTarget.Application);
+		case final GlobalConstants _ -> getValueFromTarget(target, AttributeTarget.GlobalConstant);
+		case final Connection _ -> getValueFromTarget(target, AttributeTarget.Connection);
+		case final Comment _ -> getValueFromTarget(target, AttributeTarget.Comment);
+		case final Group _ -> getValueFromTarget(target, AttributeTarget.Group);
+		case final Link _ -> getValueFromTarget(target, AttributeTarget.Link);
+		case final ServiceSequence _ -> getValueFromTarget(target, AttributeTarget.ServiceSequence);
 
 		// Types:
-		case final SubAppType o -> getValueFromTarget(target, AttributeTarget.SubAppType);
-		case final FBType o -> getValueFromTarget(target, AttributeTarget.FBType);
-		case final DataType o -> getValueFromTarget(target, AttributeTarget.DataType);
-		case final AttributeDeclaration o -> getValueFromTarget(target, AttributeTarget.AttributeDeclaration);
-		case final DeviceType o -> getValueFromTarget(target, AttributeTarget.DeviceType);
-		case final ResourceType o -> getValueFromTarget(target, AttributeTarget.ResourceType);
-		case final SegmentType o -> getValueFromTarget(target, AttributeTarget.SegmentType);
+		case final SubAppType _ -> getValueFromTarget(target, AttributeTarget.SubAppType);
+		case final FBType _ -> getValueFromTarget(target, AttributeTarget.FBType);
+		case final DataType _ -> getValueFromTarget(target, AttributeTarget.DataType);
+		case final AttributeDeclaration _ -> getValueFromTarget(target, AttributeTarget.AttributeDeclaration);
+		case final DeviceType _ -> getValueFromTarget(target, AttributeTarget.DeviceType);
+		case final ResourceType _ -> getValueFromTarget(target, AttributeTarget.ResourceType);
+		case final SegmentType _ -> getValueFromTarget(target, AttributeTarget.SegmentType);
 
 		// Instances:
-		case final TypedSubApp o -> getValueFromTarget(target, AttributeTarget.TypedSubApp);
-		case final UntypedSubApp o -> getValueFromTarget(target, AttributeTarget.UntypedSubApp);
-		case final Device o -> getValueFromTarget(target, AttributeTarget.Device);
-		case final Resource o -> getValueFromTarget(target, AttributeTarget.Resource);
-		case final Segment o -> getValueFromTarget(target, AttributeTarget.Segment);
-		case final FB o -> getValueFromTarget(target, AttributeTarget.FB);
+		case final TypedSubApp _ -> getValueFromTarget(target, AttributeTarget.TypedSubApp);
+		case final UntypedSubApp _ -> getValueFromTarget(target, AttributeTarget.UntypedSubApp);
+		case final Device _ -> getValueFromTarget(target, AttributeTarget.Device);
+		case final Resource _ -> getValueFromTarget(target, AttributeTarget.Resource);
+		case final Segment _ -> getValueFromTarget(target, AttributeTarget.Segment);
+		case final FB _ -> getValueFromTarget(target, AttributeTarget.FB);
 
 		// Pins
 		case final VarDeclaration decl when decl.eContainer() instanceof StructuredType ->
 			getValueFromTarget(target, AttributeTarget.DataTypeMember); // member of DataType
+		case final VarDeclaration decl when decl.eContainer() instanceof BaseFBType ->
+			getValueFromTarget(target, AttributeTarget.TypeVarDecl);
 		case final VarDeclaration decl when decl.eContainer() instanceof InterfaceList
 				&& decl.eContainer().eContainer() instanceof FBType ->
 			getValueFromTarget(target, AttributeTarget.TypeVarDecl);
